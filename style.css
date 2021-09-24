@@ -1,0 +1,203 @@
+:root {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+
+            font-size: 16px;
+
+            --title-size: 3em;
+            --pre-game-modal-width: 500px;
+            --pre-game-modal-height: 400px;
+            --header-height: 120px;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+}
+
+*,
+*:before,
+*::after {
+    -webkit-box-sizing: inherit;
+       -moz-box-sizing: inherit;
+            box-sizing: inherit;
+}
+
+header {
+    background-color: rgb(216, 216, 216);
+    border-bottom: 2px solid black;
+    padding-top: 30px;
+    height: var(--header-height);
+}
+
+h1 {
+    margin-top: 0;
+    text-align: center;
+    font-size: var(--title-size);
+}
+
+/* Pre Game Start Screen */
+.pre-game-modal {
+    position: fixed;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--pre-game-modal-width);
+    height: var(--pre-game-modal-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+
+    
+}
+
+.pre-game-modal > :first-child {
+    flex: 0 0 30%;
+    border: 2px solid black;
+}
+
+.pre-game-modal > :first-child h3,
+.pre-game-modal > :nth-child(2) h3 {
+    text-align: center;
+}
+
+.pre-game-modal label {
+    display: block;
+    width: 50px;
+    text-align: center; 
+    margin: 0 auto 0 auto;
+}
+
+.pre-game-modal input {
+    display: block; 
+    margin: 0 auto 0 auto;
+}
+
+.player2-bot {
+    flex: 0 0 30%;
+    border: 2px solid black;
+    position: relative;
+}
+
+.choosing {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.choosing.close {
+    visibility: hidden;
+}
+
+.player2, 
+.computer {
+    border: 1px solid black;
+    cursor: pointer;
+    padding: 0.5em;
+}
+
+.player2-choosen,
+.computer-choosen {
+    position: absolute;
+    visibility: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.player2-choosen.open,
+.computer-choosen.open {
+    visibility: visible;
+}
+
+.player2-choosen .return,
+.computer-choosen .return {
+    position: absolute;
+    top: 5%;
+    right: 2%;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+}
+
+.player2-choosen .return::after,
+.computer-choosen .return::after {
+    content: '\00d7';
+    position: absolute;
+    top: -10%;
+    left: 25%;
+}
+
+.computer-choosen div {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+input[name="difficulty"] {
+    display: none;
+}
+
+input[name="difficulty"] + label {
+    /* style passive state as you like */
+    width: 5em;
+    border: 3px outset lightgrey;
+}
+
+input[name="difficulty"]:checked + label {
+    /* style checked state as you like */
+    border: 3px inset lightblue;
+}
+
+.pre-game-modal > button {
+    flex: 0 0 10%;
+    width: 8em;
+    margin: 0 auto 0 auto;
+}
+
+/*----------------------*/
+main {
+    display: none;
+    position: relative;
+    height: calc(100vh - var(--header-height));
+}
+
+.main-grid {
+    position: absolute;
+    width: 35em;
+    height: 35em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-child {
+    border: 2px solid black;
+}
+
+.grid-child:nth-child(1),
+.grid-child:nth-child(2),
+.grid-child:nth-child(3) {
+    border-top: none;
+}
+
+.grid-child:nth-child(3n+1) {
+    border-left: none;
+}
+
+.grid-child:nth-child(3n+3) {
+    border-right: none;
+}
+
+.grid-child:nth-child(7),
+.grid-child:nth-child(8),
+.grid-child:nth-child(9) {
+    border-bottom: none;
+}
