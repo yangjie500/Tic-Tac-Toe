@@ -180,6 +180,8 @@ main {
 
 .grid-child {
     border: 2px solid black;
+    cursor: pointer;
+    position: relative;
 }
 
 .grid-child:nth-child(1),
@@ -200,4 +202,59 @@ main {
 .grid-child:nth-child(8),
 .grid-child:nth-child(9) {
     border-bottom: none;
+}
+
+.choosenX,
+.choosenO {
+    cursor: not-allowed;
+}
+
+.choosenX::after {
+    content: "";
+    position: absolute;
+    display: block;
+    background-color: black;
+    width: 100%;
+    height: 1.5em;
+    top: 50%;
+    transform: translateY(-50%) rotateZ(45deg);
+   
+}
+
+.choosenX::before {
+    content: "";
+    display: block;
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 1.5em;
+    top: 50%;
+    transform: translateY(-50%) rotateZ(135deg);
+
+}
+
+.choosenO::before {
+    content: "";
+    display: block;
+    position: absolute;
+    background-color: black;
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.choosenO::after {
+    content: "";
+    display: block;
+    position: absolute;
+    background-color: white;
+    width: 65%;
+    height: 65%;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
