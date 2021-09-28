@@ -61,7 +61,7 @@ const preGameModal = (() => {
 
         if (choosePlayer) {
             console.log('PlayerChoosen');
-            playerTwo = player(playerTwoInput.value, display='2');
+            playerTwo = player(playerTwoInput.value, display=2);
             playerSelected['playerTwo'] = playerTwo;
         } else {
             console.log('ComputerChoosen');
@@ -74,17 +74,17 @@ const preGameModal = (() => {
         modal.style.display = 'none';
         board.style.display = 'block';
     })
-    return playerSelected;
+    return {playerSelected};
 })();
 
-const player = ((name, display='1') => {
+const player = ((name, display=1) => {
     return {
         name,
         display
     };
 })
 
-const computerAi = ((difficulty, display='2') => {
+const computerAi = ((difficulty, display=2) => {
     return {
         display
     }
@@ -97,11 +97,15 @@ const gameBoard = (() => {
 
     const getBoard = () => _board
 
-    const updateBoard = () => {
-
+    const updateBoard = (gridNum, player) => {
+        const rowNum = gridNum.substr(0,1);
+        const colNum = gridNum.substr(-1);
+        _board[rowNum][colNum] = player.display;
+        console.log(checkVictory.hasVictory(_board));
     }
     return {
-        getBoard
+        getBoard,
+        updateBoard
     }
 
 })();
@@ -110,12 +114,25 @@ const game = (() => {
     const grids = document.querySelectorAll('.grid-child');
     let displayClass = 'choosenX';
     let gameRound = 1;
-    const temp = {gameRounds: 1};
-    let gridSelected = [];
+    let gridSelected;
+    let currentPlayer;
+    let isComputer;
 
+    const _getCurrentPlayer = () => {
+        isComputer = preGameModal.playerSelected.playerTwo ? false : true;
+        if (gameRound % 2 === 1) {
+            currentPlayer = preGameModal.playerSelected.playerOne;
+            console.log(currentPlayer);
+        } else if (isComputer === false) {
+            currentPlayer = preGameModal.playerSelected.playerTwo;
+            console.log(currentPlayer);
+        } else {
+            currentPlayer = preGameModal.playerSelected.computer;
+            console.log(currentPlayer);
+        }
+    }
     const _nextRound = () => {
         gameRound++;
-        temp['gameRounds']++;
     }
     const _switchTurn = () => {
         _nextRound();
@@ -128,14 +145,77 @@ const game = (() => {
 
     grids.forEach( elem => {
         elem.addEventListener('click', e => {
+            _getCurrentPlayer();
+
             e.target.classList.toggle(displayClass);
-            gridSelected.push(e.target.getAttribute('data-grid'));
+            gridSelected = (e.target.getAttribute('data-grid'));
+            gameBoard.updateBoard(gridSelected, currentPlayer);
             _switchTurn();
         }, {once: true});
     });
 
+    const temp = ()=> 'hello'
+
     return {
-        gridSelected
+        gridSelected,
+    }
+})()
+
+
+const checkVictory = (() => {
+    const _checkPlayerTurnVictory = () => {
+        
+    }
+
+    const _checkVertical = (board) => {
+        for (let i = 0; i<=2; i++) {
+            if (board[0][i] === _checkPlayerTurnVictory() && board[1][i] === _checkPlayerTurnVictory() && board[2][i] === _checkPlayerTurnVictory()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    const _checkHorizontal = (board) => {
+        for (let i = 0; i<=2; i++) {
+            if (board[i][0] === _checkPlayerTurnVictory() && board[i][1] === _checkPlayerTurnVictory() && board[i][2] === _checkPlayerTurnVictory(r)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    const _checkTopToRightdiagonal = (board) => {
+    
+        if (board[0][0] === _checkPlayerTurnVictory() && board[1][1] === _checkPlayerTurnVictory() && board[2][2] === _checkPlayerTurnVictory()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    const _checkBtmToRightdiagonal = (board) => {
+        for (let i = 0; i<=2; i++) {
+            if (board[2][0] === _checkPlayerTurnVictory() && board[1][1] === _checkPlayerTurnVictory() && board[0][2] === _checkPlayerTurnVictory()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    const hasVictory = () => {
+        if (_checkVertical() || _checkHorizontal() || _checkTopToRightdiagonal() || _checkBtmToRightdiagonal()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    return {
+        hasVictory
     }
 })()
 
