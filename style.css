@@ -9,6 +9,8 @@
             --pre-game-modal-width: 500px;
             --pre-game-modal-height: 400px;
             --header-height: 120px;
+            --player-name: 4em;
+            --result: 2.5em;
 }
 
 body {
@@ -257,4 +259,37 @@ main {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+/*----------------------*/
+
+.end-modal {
+    display: none;
+    position: absolute;
+    background-color: rgb(204, 204, 201);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40em;
+    height: 25em;
+    border: 2px solid black;
+}
+
+.end-modal h3 {
+    text-align: center;
+    font-size: var(--player-name);
+}
+
+.end-modal p {
+    text-align: center;
+    font-size: var(--result);
+}
+
+.end-modal .restart {
+    display: block;
+    width: 5em;
+    height: 2.5em;
+    margin: 10px auto;
+    text-transform: capitalize;
+    border-radius: 10px;
 }

@@ -84,9 +84,11 @@ const player = ((name, display=1) => {
     };
 })
 
-const computerAi = ((difficulty, display=2) => {
+const computerAi = ((name='computer', difficulty, display=2) => {
     return {
-        display
+        name,
+        display,
+        difficulty
     }
 })
 
@@ -101,7 +103,7 @@ const gameBoard = (() => {
         const rowNum = gridNum.substr(0,1);
         const colNum = gridNum.substr(-1);
         _board[rowNum][colNum] = player.display;
-        console.log(checkVictory.hasVictory(_board));
+        return checkVictory.hasVictory(_board);
     }
     return {
         getBoard,
@@ -117,19 +119,22 @@ const game = (() => {
     let gridSelected;
     let currentPlayer;
     let isComputer;
+    let result;
 
     const _getCurrentPlayer = () => {
         isComputer = preGameModal.playerSelected.playerTwo ? false : true;
         if (gameRound % 2 === 1) {
             currentPlayer = preGameModal.playerSelected.playerOne;
             console.log(currentPlayer);
-        } else if (isComputer === false) {
+        } else if (isComputer === false && gameRound % 2 === 0) {
             currentPlayer = preGameModal.playerSelected.playerTwo;
             console.log(currentPlayer);
         } else {
             currentPlayer = preGameModal.playerSelected.computer;
             console.log(currentPlayer);
         }
+
+        return currentPlayer;
     }
     const _nextRound = () => {
         gameRound++;
@@ -143,79 +148,118 @@ const game = (() => {
         }
     }
 
+    const _endGame = (result, currentPlayer) => {
+        let endGameMessage;
+        if (result === true) {
+            endGameMessage = 'Won';
+            _addEndGameMessage(endGameMessage, currentPlayer.name)
+        } else if (result === 'draw') {
+            endGameMessage = 'Draw';
+            _addEndGameMessage(endGameMessage, currentPlayer.name)
+        } else {
+            return;
+        }
+        grids.forEach( (elem) => {
+            elem.removeEventListener('click', (e) => {
+                e.target.classList.toggle(displayClass);
+                result = gameBoard.updateBoard(gridSelected, currentPlayer);
+            });
+        });
+    }
+
+    const _addEndGameMessage = (message, who) => {
+        const endModal = document.querySelector('.end-modal');
+        const htmlWho = document.querySelector('.end-modal h3');
+        const htmlMessage = document.querySelector('.end-modal p');
+        const restartBtn = document.querySelector('.end-modal .restart');
+        
+        endModal.style.display = 'block';
+        htmlWho.textContent = who;
+        if (message === 'Draw') {
+            console.log('HELLO');
+            htmlWho.textContent = 'Both';
+            htmlMessage.textContent = message;
+        }
+
+        restartBtn.addEventListener('click', (e) => {
+            window.location.reload();
+        })
+    }
+
     grids.forEach( elem => {
         elem.addEventListener('click', e => {
             _getCurrentPlayer();
 
             e.target.classList.toggle(displayClass);
             gridSelected = (e.target.getAttribute('data-grid'));
-            gameBoard.updateBoard(gridSelected, currentPlayer);
+            result = gameBoard.updateBoard(gridSelected, currentPlayer);
+            _endGame(result, currentPlayer);
             _switchTurn();
         }, {once: true});
     });
 
-    const temp = ()=> 'hello'
-
     return {
         gridSelected,
+        _getCurrentPlayer
     }
 })()
 
 
 const checkVictory = (() => {
+    let gameRound = 0;
+    let win = false;
     const _checkPlayerTurnVictory = () => {
-        
+        const turn = game._getCurrentPlayer()
+        return turn.display
     }
 
     const _checkVertical = (board) => {
+        const num = _checkPlayerTurnVictory();
         for (let i = 0; i<=2; i++) {
-            if (board[0][i] === _checkPlayerTurnVictory() && board[1][i] === _checkPlayerTurnVictory() && board[2][i] === _checkPlayerTurnVictory()) {
+            if (board[0][i] === num && board[1][i] === num && board[2][i] === num) {
                 return true;
-            } else {
-                return false;
-            }
+            } 
         }
+        return false;
     }
 
     const _checkHorizontal = (board) => {
+        const num = _checkPlayerTurnVictory();
         for (let i = 0; i<=2; i++) {
-            if (board[i][0] === _checkPlayerTurnVictory() && board[i][1] === _checkPlayerTurnVictory() && board[i][2] === _checkPlayerTurnVictory(r)) {
+            if (board[i][0] === num && board[i][1] === num && board[i][2] === num) {
                 return true;
-            } else {
-                return false;
             }
         }
     }
 
     const _checkTopToRightdiagonal = (board) => {
-    
-        if (board[0][0] === _checkPlayerTurnVictory() && board[1][1] === _checkPlayerTurnVictory() && board[2][2] === _checkPlayerTurnVictory()) {
+        const num = _checkPlayerTurnVictory();
+        if (board[0][0] === num && board[1][1] === num && board[2][2] === num) {
             return true;
-        } else {
-            return false;
-        }
+        } 
     }
 
     const _checkBtmToRightdiagonal = (board) => {
-        for (let i = 0; i<=2; i++) {
-            if (board[2][0] === _checkPlayerTurnVictory() && board[1][1] === _checkPlayerTurnVictory() && board[0][2] === _checkPlayerTurnVictory()) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        const num = _checkPlayerTurnVictory();
+        if (board[2][0] === num && board[1][1] === num && board[0][2] === num) {
+            return true;
+        } 
+        
     }
 
-    const hasVictory = () => {
-        if (_checkVertical() || _checkHorizontal() || _checkTopToRightdiagonal() || _checkBtmToRightdiagonal()) {
-            return true;
-        } else {
-            return false;
+    const hasVictory = (board) => {
+        if (_checkVertical(board) || _checkHorizontal(board) || _checkTopToRightdiagonal(board) || _checkBtmToRightdiagonal(board)) {
+            win = true;
         }
+        gameRound++;
+        
+        if (gameRound === 9 && win === false) {
+            return 'draw'
+        }
+        return win;      
     }
 
     return {
         hasVictory
     }
 })()
-
