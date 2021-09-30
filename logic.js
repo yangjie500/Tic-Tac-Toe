@@ -67,7 +67,7 @@ const preGameModal = (() => {
             console.log('ComputerChoosen');
             computerDifficulty = document.querySelector('input[name="difficulty"]:checked').id;
             console.log(computerDifficulty);
-            computer = computerAi(computerDifficulty);
+            computer = computerAi(difficulty=computerDifficulty);
             playerSelected['computer'] = computer;
         }
         
@@ -84,11 +84,60 @@ const player = ((name, display=1) => {
     };
 })
 
-const computerAi = ((name='computer', difficulty, display=2) => {
+const computerAi = ((difficulty, name='computer', display=2) => {
+    computerMove = () => {
+        if (difficulty === 'easy') {
+            return _easyMove();
+        } else {
+            return _mediumMove();
+        }
+    }
+
+    _randomNum = (max = 3) => {
+        return Math.floor(Math.random() * max)
+    }
+
+    _easyMove = () => {
+        let first = _randomNum();
+        let second= _randomNum();
+        while (!_checkValidMove(first, second)) {
+            first = _randomNum();
+            second= _randomNum();
+        }
+        console.log(`${first}-${second}`)
+        return `${first}-${second}`;
+    }
+
+    _checkValidMove = (first, second) => {
+        if (gameBoard.getBoard()[first][second] === 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    _mediumMove = () => {
+        let playerCanWin = false
+        let tempBoard = gameBoard.getBoard().slice()
+        for (let i = 0; i<=2; i++) {
+            for (let j = 0; j<=2; j++) {
+                if (gameBoard.getBoard()[i][j] === 0) {
+                    tempBoard[i][j] = 2;
+                    playerCanWin = checkVictory.hasVictory(tempBoard);
+                    tempBoard[i][j] = 0;
+
+                    if (playerCanWin) {return `${i}-${j}`}
+                }
+            }
+        }
+
+        return _easyMove();
+    }
     return {
         name,
         display,
-        difficulty
+        difficulty,
+        computerMove
     }
 })
 
@@ -120,18 +169,19 @@ const game = (() => {
     let currentPlayer;
     let isComputer;
     let result;
+    let hasEnded = false;
 
     const _getCurrentPlayer = () => {
         isComputer = preGameModal.playerSelected.playerTwo ? false : true;
         if (gameRound % 2 === 1) {
             currentPlayer = preGameModal.playerSelected.playerOne;
-            console.log(currentPlayer);
+            //console.log(currentPlayer);
         } else if (isComputer === false && gameRound % 2 === 0) {
             currentPlayer = preGameModal.playerSelected.playerTwo;
-            console.log(currentPlayer);
+            //console.log(currentPlayer);
         } else {
             currentPlayer = preGameModal.playerSelected.computer;
-            console.log(currentPlayer);
+            //console.log(currentPlayer);
         }
 
         return currentPlayer;
@@ -152,19 +202,15 @@ const game = (() => {
         let endGameMessage;
         if (result === true) {
             endGameMessage = 'Won';
-            _addEndGameMessage(endGameMessage, currentPlayer.name)
+            _addEndGameMessage(endGameMessage, currentPlayer.name);
+            hasEnded = true;
         } else if (result === 'draw') {
             endGameMessage = 'Draw';
-            _addEndGameMessage(endGameMessage, currentPlayer.name)
+            _addEndGameMessage(endGameMessage, currentPlayer.name);
+            hasEnded = true;
         } else {
             return;
         }
-        grids.forEach( (elem) => {
-            elem.removeEventListener('click', (e) => {
-                e.target.classList.toggle(displayClass);
-                result = gameBoard.updateBoard(gridSelected, currentPlayer);
-            });
-        });
     }
 
     const _addEndGameMessage = (message, who) => {
@@ -172,11 +218,12 @@ const game = (() => {
         const htmlWho = document.querySelector('.end-modal h3');
         const htmlMessage = document.querySelector('.end-modal p');
         const restartBtn = document.querySelector('.end-modal .restart');
+        const backdrop = document.querySelector('.backdrop-modal');
         
+        backdrop.style.display = 'block';
         endModal.style.display = 'block';
         htmlWho.textContent = who;
         if (message === 'Draw') {
-            console.log('HELLO');
             htmlWho.textContent = 'Both';
             htmlMessage.textContent = message;
         }
@@ -188,14 +235,27 @@ const game = (() => {
 
     grids.forEach( elem => {
         elem.addEventListener('click', e => {
-            _getCurrentPlayer();
+            if (e.target.classList[1] === 'choosenO') return; // Prevent Clicking on grid that computer has placed
 
+            _getCurrentPlayer(); // Based on game round determined the current turn of player
             e.target.classList.toggle(displayClass);
             gridSelected = (e.target.getAttribute('data-grid'));
-            result = gameBoard.updateBoard(gridSelected, currentPlayer);
-            _endGame(result, currentPlayer);
+            result = gameBoard.updateBoard(gridSelected, currentPlayer); // Update board with the choosen grid
+            _endGame(result, currentPlayer); // Check whether has a winner been determined and pop up the end modal
             _switchTurn();
-        }, {once: true});
+            console.log('Hello',hasEnded);
+
+            if (isComputer && hasEnded === false) { //hasEnded to prevent computer from making a move after playerOne wins
+                _getCurrentPlayer(); // Based on game round determined the current turn of player
+                gridSelected = currentPlayer.computerMove()
+                let computerDisplay = document.querySelector(`[data-grid='${gridSelected}']`);
+                computerDisplay.classList.toggle(displayClass);
+                result = gameBoard.updateBoard(gridSelected, currentPlayer); // Update board with the choosen grid
+                console.log(gameBoard.getBoard());
+                _endGame(result, currentPlayer); // Check whether has a winner been determined and pop up the end modal
+                _switchTurn();
+            }
+        }, {once: true}); // Prevent Clicking on grid the player him/herself has clicked on
     });
 
     return {
@@ -252,7 +312,7 @@ const checkVictory = (() => {
             win = true;
         }
         gameRound++;
-        
+        console.log(gameRound);
         if (gameRound === 9 && win === false) {
             return 'draw'
         }
